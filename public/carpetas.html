@@ -1,0 +1,45 @@
+<!-- carpetas.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carpetas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Carpetas y Archivos OneDrive</h1>
+        <div id="compartidas">
+           <a href="http://localhost:3008/compartidas.html"> <button>Ver carpetas compartidas</button></a>
+        </div>
+        <div id="ruta">
+            <ol class="ruta-lista">
+                <li class="ruta-item"></li>
+            </ol>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="foldersList"></tbody>
+            <tbody id="filesList"></tbody>
+        </table>
+    </div>
+    <div id="loader" class="hidden">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Cargando...</div>
+        </div>
+    </div>
+    
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="cliente.js"></script>
+</body>
+</html>
