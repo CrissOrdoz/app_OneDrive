@@ -60,11 +60,14 @@ export async function downloadFile_c(accessToken: string, folderContenId: string
 
       const downloadSize = parseInt(response.headers['content-length'], 10);
       const fileSize = response2.data.size  ;
-      if (downloadSize !== fileSize) {
-
-        throw new Error('El tamaño del archivo descargado no coincide con el tamaño esperado.');
-        }
-
+      const contentType = response.headers['content-type'];
+      if (contentType !== 'text/plain') {
+        if (downloadSize !== fileSize) {
+            throw new Error('El tamaño del archivo descargado no coincide con el tamaño esperado.');
+          }
+      } else {
+          console.log('El tipo de contenido es:', contentType);
+      }
       console.log(downloadSize, fileSize);
 
       const contentDispositionHeader = response.headers['content-disposition'];
