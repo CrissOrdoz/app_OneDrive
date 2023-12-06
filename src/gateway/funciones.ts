@@ -36,7 +36,6 @@ export async function getOneDriveFolders(accessToken:string, urlp: string): Prom
 
 //Descargar archivos
 export async function downloadFile(accessToken: string, folderContenId: string,   rutaDescargas:string) {
-    console.log(`https://graph.microsoft.com/v1.0/me/drive/items/${folderContenId}/content`)
 
     try {
       const response = await axios.get(
@@ -61,39 +60,60 @@ export async function downloadFile(accessToken: string, folderContenId: string, 
       const downloadSize = parseInt(response.headers['content-length'], 10);
       const fileSize = response2.data.size  ;
       const contentType = response.headers['content-type'];
-      if (contentType !== 'text/plain') {
-        if (downloadSize !== fileSize) {
-            throw new Error('El tamaño del archivo descargado no coincide con el tamaño esperado.');
-          }
-      } else {
-          console.log('El tipo de contenido es:', contentType);
-      }
-
-      console.log(downloadSize, fileSize);
+      
 
       const contentDispositionHeader = response.headers['content-disposition'];
       const decodedContentDisposition = decodeURIComponent(contentDispositionHeader);
       const filenameMatch = decodedContentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i);
       const filename = filenameMatch ? filenameMatch[1] : 'file';
-      
-      // Comprobar si la ruta de descarga existe, si no, crearla
-      if (!fs.existsSync(rutaDescargas)){ 
-        fs.mkdirSync(rutaDescargas, { recursive: true });
-      }      
-      const writeStream = fs.createWriteStream(path.join(rutaDescargas, filename));
-      response.data.pipe(writeStream);
+      const filePath = path.join(rutaDescargas, filename);
 
-      
-      await new Promise<void>((resolve, reject) => {
-        writeStream.on('finish', () => {
-          resolve();
-        });
-        writeStream.on('error', (error) => {
-          reject(error);
-        });
-      });
+      //###############################################################################
 
-     
+      if(contentType == 'text/plain'){
+        //Comprovar ruta de descarga 
+        if (!fs.existsSync(rutaDescargas)){ 
+          fs.mkdirSync(rutaDescargas, { recursive: true });
+        }      
+        const writeStream = fs.createWriteStream(filePath);
+        response.data.pipe(writeStream);
+
+        
+        await new Promise<void>((resolve, reject) => {
+          writeStream.on('finish', () => {
+            resolve();
+          });
+          writeStream.on('error', (error) => {
+            reject(error);
+          });
+        });
+      }else{
+        if(downloadSize == fileSize){
+          
+          if(!fs.existsSync(filePath)){
+            console.log(downloadSize, fileSize)
+            //Comprovar ruta de descarga 
+            if (!fs.existsSync(rutaDescargas)){ 
+              fs.mkdirSync(rutaDescargas, { recursive: true });
+            }      
+            const writeStream = fs.createWriteStream(filePath);
+            response.data.pipe(writeStream);
+
+            
+            await new Promise<void>((resolve, reject) => {
+              writeStream.on('finish', () => {
+                resolve();
+              });
+              writeStream.on('error', (error) => {
+                reject(error);
+              });
+            });
+          }
+        }else{
+          throw new Error('El tamaño del archivo descargado no coincide con el tamaño esperado.');
+        }
+      }
+      //###############################################################################
 
     } catch (error) {
         this.server.emit('descargaNoCompletada', 'La descarga no se ha podido completar');
