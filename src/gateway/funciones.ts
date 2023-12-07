@@ -67,10 +67,11 @@ export async function downloadFile(accessToken: string, folderContenId: string, 
       const filenameMatch = decodedContentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i);
       const filename = filenameMatch ? filenameMatch[1] : 'file';
       const filePath = path.join(rutaDescargas, filename);
-
+      let alertaExt = false;
       //###############################################################################
 
       if(contentType == 'text/plain'){
+        alertaExt = true;
         //Comprovar ruta de descarga 
         if (!fs.existsSync(rutaDescargas)){ 
           fs.mkdirSync(rutaDescargas, { recursive: true });
@@ -91,7 +92,8 @@ export async function downloadFile(accessToken: string, folderContenId: string, 
         if(downloadSize == fileSize){
           
           if(!fs.existsSync(filePath)){
-            console.log(downloadSize, fileSize)
+            console.log(downloadSize, fileSize);
+            alertaExt = true;
             //Comprovar ruta de descarga 
             if (!fs.existsSync(rutaDescargas)){ 
               fs.mkdirSync(rutaDescargas, { recursive: true });
@@ -99,7 +101,6 @@ export async function downloadFile(accessToken: string, folderContenId: string, 
             const writeStream = fs.createWriteStream(filePath);
             response.data.pipe(writeStream);
 
-            
             await new Promise<void>((resolve, reject) => {
               writeStream.on('finish', () => {
                 resolve();
@@ -114,7 +115,9 @@ export async function downloadFile(accessToken: string, folderContenId: string, 
         }
       }
       //###############################################################################
-
+    if (alertaExt){
+      return alertaExt
+    }
     } catch (error) {
         this.server.emit('descargaNoCompletada', 'La descarga no se ha podido completar');
         console.log(error);
@@ -154,10 +157,12 @@ export async function getFolderContent(accessToken: string, folderId: string): P
   }
 
 
+  let existe2;
 
-export async function downloadFolder(folderId: string, nameFolder: string, rutaDescarga: string, accessToken: string) {
+export async function downloadFolder(folderId: string, nameFolder: string, rutaDescarga: string, accessToken: string, existe: boolean) {
 
   try {
+    existe2 = existe;
     const constResponse = await axios.get(
       `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}/children`,
       {
@@ -169,20 +174,29 @@ export async function downloadFolder(folderId: string, nameFolder: string, rutaD
 
     const items = constResponse.data.value;
     const folderPath = path.join(rutaDescarga, nameFolder);
-
+    
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true });
     }
-
+    
     const promises = items.map(async (item: any) => {
       if (item.folder) {
-        await downloadFolder(item.id, item.name, folderPath, accessToken);
+        await downloadFolder(item.id, item.name, folderPath, accessToken, existe2);
       } else if (item.file) {
-        await downloadFile(accessToken, item.id, folderPath);
+        existe = await downloadFile(accessToken, item.id, folderPath);
       }
     });
+    
 
     await Promise.all(promises);
+
+
+    if (existe) {
+      existe2 = true;
+    }
+  return existe2
+    
+    
   } catch (error) {
     console.error('Error al descargar la carpeta', error.message);
     throw new Error('Error al descargar la carpeta');
