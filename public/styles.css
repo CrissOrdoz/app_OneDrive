@@ -1,3 +1,5 @@
+/* styles.css */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f8f8;
@@ -36,7 +38,8 @@ th, td {
 th {
     background-color: #f0f0f0;
 }
-.carpeta  {
+
+.carpeta {
     background-color: #f8f8f3;
 }
 
@@ -58,8 +61,6 @@ button {
 button:hover {
     background-color: #0056b3;
 }
-
-
 
 .hidden {
     display: none !important;
@@ -101,30 +102,60 @@ button:hover {
     color: #007bff;
 }
 
-
 /* Estilos para la lista de ruta */
+#ruta {
+    display: block;
+}
+
 .ruta-lista {
     list-style: none;
     padding: 0;
     display: flex;
-  }
-  
-  .ruta-item {
+}
+
+.ruta-item {
     margin: 0 5px;
     cursor: pointer;
     color: rgb(3, 177, 197); 
-    text-decoration:solid; 
-  }
-  
-  .ruta-item:hover {
+    text-decoration: solid; 
+}
+
+.ruta-item:hover {
     background-color: aquamarine;
     color: rgb(2, 91, 94);
-  }
-  
-  /* Estilo opcional para resaltar el elemento actual */
-  .ruta-item.active {
+}
+
+/* Estilo opcional para resaltar el elemento actual */
+.ruta-item.active {
     font-weight: bold;
     color: black; /* Cambia el color a tu gusto */
     text-decoration: none;
-  }
-  
+}
+
+#compartidas {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.options-container {
+    display: flex;
+    align-items: center;
+}
+
+button.options-button {
+    margin-right: 10px; /* Espaciado entre el botón y el contenedor de la derecha */
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+}
+
+label {
+    margin-right: 5px; /* Espaciado entre el label y el checkbox */
+}
+input[type="checkbox"] {
+    /* No es necesario flotar el checkbox ni ajustar el margen */
+}

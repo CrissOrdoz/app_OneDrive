@@ -1,12 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Body, Controller, Get, Post, forwardRef, Inject } from '@nestjs/common';
+import { UserService } from './app.service';
+import { MyGateway } from './gateway/my-gategay.gateway';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+@Controller('users')
+export class UserController {
+  constructor(
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => MyGateway)) private readonly myGateway: MyGateway,
+  ) {}
+  
+  @Post()
+  async saveFolder( @Body('folderId') folderId: string, @Body('name') name: string) {
+    const user = await this.userService.saveFolder(folderId ,name);
+    return user;
   }
 }

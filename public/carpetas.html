@@ -11,8 +11,15 @@
     <div class="container">
         <h1>Carpetas y Archivos OneDrive</h1>
         <div id="compartidas">
-           <a href="http://localhost:3008/compartidas.html"> <button>Ver carpetas compartidas</button></a>
-        </div>
+            <a href="http://localhost:3008/compartidas.html">
+                <button>Ver carpetas compartidas</button>
+            </a>
+            <div class="checkbox-container">
+                <label for="check">Obtener solo las carpetas no descargadas</label>
+                <input type="checkbox" name="check" id="check">
+            </div>
+
+        </div>        
         <div id="ruta">
             <ol class="ruta-lista">
                 <li class="ruta-item"></li>

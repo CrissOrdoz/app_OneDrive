@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const foldersList = document.getElementById('foldersList');
     const filesList = document.getElementById('filesList');
+    var checkbox = document.getElementById('check');
 
     function limpiarTabla(tabla) {
         while (tabla.firstChild) {
@@ -48,10 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const id = this.dataset.id;
         const name = this.dataset.name;
         const fold= this.dataset.fold;
-
+        const check = checkbox.checked; 
         const type = this.parentElement.parentElement.children[0].textContent;
         const eventName = (type === 'Carpeta') ? 'descargarFolder' : 'descargarFile';
-        socket.emit(eventName, { id, name, fold});
+        socket.emit(eventName, { id, name, fold,check});
     }
     
 
@@ -62,8 +63,9 @@ document.addEventListener('DOMContentLoaded', function() {
             carpeta.addEventListener('click', function() {
                 const id = this.dataset.id;
                 const name = this.dataset.name;
-                const fold = this.dataset.fold;                
-                socket.emit('mostrarContenidoCarpeta', { id, name, fold });
+                const fold = this.dataset.fold;
+                      
+                socket.emit('mostrarContenidoCarpeta', { id, name, fold});
                 
             });
         });

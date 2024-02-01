@@ -1,16 +1,4 @@
-1. generar la ruta adecuada para la descarga de archivos [listo]
-2. Poner a funcionar la descarga por carpetas [Listo]
-  2.1 verificar el orden de las carpetas [listo]
-3. Cambiar la alerta por una notificacion diferente [quiza no es necesario]
-4. Agregar el nombre de la carpeta en el titulo [probar]
-5. Mostrar una ruta de carpetas debajo del titulo [En proceso]
-  5.1 Agregar eventos de click a la ruta de carpetas
-  5.2 eliminar la ruta de adelante a la que se haga click (tambien  a la que se le hace click ya que la vuelve a crear)
-
-6. Verificar la descarga [Listo]
-   6.1 Descarga por ruta [Listo]
-   6.2 Descarga de archivos grandes [Listo]
-
-7. Gestionar las Url de carpeta principar y carpeta compartida 
-
-8. verificar la funciones de contenido de carpetas
+1. el boton de descargar archivos no sirve
+2. verificar la ruta de descarga para ver si existen los archivos 
+3. check box para borrar al descargar (si se activa va a borrar lo que esta descargado)
+5. ver los slash 

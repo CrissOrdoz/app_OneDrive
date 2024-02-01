@@ -1,15 +1,16 @@
 // my-gateway.gateway.ts
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
+import { forwardRef, Inject} from "@nestjs/common";
 import { Server } from "socket.io";
 import { accessToken} from './config';
-import { Socket } from "socket.io";
-import { getOneDriveFolders, downloadFile,  getFolderContent, downloadFolder} from "./funciones";
-import { url } from "inspector";
+import { getOneDriveFolders, downloadFile,  getFolderContent, downloadFolder, verifyContent} from "./funciones";
 import { getOneDriveFolders_c, downloadFile_c,  getFolderContent_c, downloadFolder_c } from "./funciones-comp";
+import { UserController } from "src/app.controller";
+import { UserService } from "src/app.service";
 
 @WebSocketGateway()
 export class MyGateway {
-  
+  constructor(@Inject(forwardRef(() => UserController)) private userController: UserController, private readonly userService: UserService) {}
     @WebSocketServer() 
     server: Server;
     
@@ -23,22 +24,23 @@ export class MyGateway {
 
    
     @SubscribeMessage('mostrarContenidoCarpeta') 
-    async handleContenido(@MessageBody() data: any){
+    async handleContenido(@MessageBody() data: any) {
       this.server.emit('mostrarLoader');
-      try{
-        const folderId = data.id;
-        const name = data.name;
-        const fold = data.fold;
-        const contenido = await  getFolderContent(accessToken, folderId);
-        const rutalk = {name : name, id: folderId, fold: fold};
-        this.server.emit('carpetas',{contenido: contenido, foldername: `${fold}\\${name}`});
+    
+      try {
+        const { id: folderId, name, fold: fold} = data;
+        const rutaDescarga = `C:\\Users\\crist\\OneDrive\\Escritorio\\descargaOneDrive\\${fold}\\${name}`;
+        
+        const contenido1 = await getFolderContent(accessToken, folderId);
+        const rutalk = { name, id: folderId, fold };
+        this.server.emit('carpetas', { contenido: contenido1, foldername: `${fold}\\${name}` });
         this.server.emit('actualizarRuta', rutalk);
         this.server.emit('ocultarLoader');
+      } catch (error) {
+        console.error(error);
       }
-     catch (error){
-      console.log(error);
     }
-  }
+    
 
   @SubscribeMessage('descargarFile') 
   async handleDescarga(@MessageBody() data: any) {
@@ -65,14 +67,18 @@ export class MyGateway {
       const folderId = data.id;
       const folderName = data.name;
       const fold = data.fold;
+      const check = data.check;
       const rutaDescarga = `C:\\Users\\crist\\OneDrive\\Escritorio\\descargaOneDrive\\${fold}`;
-      let existe = false;
-      existe = await downloadFolder(folderId, folderName, rutaDescarga, accessToken, existe);
-      if(existe){
-        this.server.emit('descargaCompletada', `la carpeta ${folderName} se ha descargado correctamente`);
+      const existingFolder = await this.userService.findFolderById(folderId);
+      console.log(check, existingFolder);
+      if (check && existingFolder){
+        this.server.emit('descargaCompletada', `la carpeta ${folderName} ya existe`);
       }else{
-        this.server.emit('descargaCompletada', `la carpeta ${folderName} ya existe en el dispositivo`);
-      }      
+        await downloadFolder(folderId, folderName, rutaDescarga, accessToken);
+        this.server.emit('descargaCompletada', `la carpeta ${folderName} se ha descargado correctamente`);
+      };
+      //console.log(existingFolder);
+      this.userController.saveFolder(folderId, folderName);    
       this.server.emit('ocultarLoader');
     } catch (error) {
       this.server.emit('descargaNoCompletada', 'La descarga no se ha podido completar');
@@ -116,14 +122,20 @@ export class MyGateway {
         const folderName = data.name;
         const fold = data.fold;
         const driveId = data.driveId;
-        const rutaDescarga = `C:\\Users\\crist\\OneDrive\\Escritorio\\descargaOneDrive\\${fold}`;
-        let existe = false;
-        existe = await downloadFolder_c(folderId, driveId, folderName, rutaDescarga, accessToken, existe);
-        if(existe){
-          this.server.emit('descargaCompletada', `la carpeta ${folderName} se ha descargado correctamente`);
+        const check = data.check
+        const rutaDescarga = `C:\\Users\\crist\\OneDrive\\Escritorio\\descargaOneDrive\\${fold}`; 
+        const existingFolder = await this.userService.findFolderById(folderId);
+        
+
+        console.log(check, existingFolder);
+        if (check && existingFolder){
+          this.server.emit('descargaCompletada', `la carpeta ${folderName} ya existe`);
         }else{
-          this.server.emit('descargaCompletada', `la carpeta ${folderName} ya existe en el dispositivo`);
-        }
+          await downloadFolder_c(folderId, driveId, folderName, rutaDescarga, accessToken);
+          this.server.emit('descargaCompletada', `la carpeta ${folderName} se ha descargado correctamente`);
+        };
+        this.userController.saveFolder(folderId, folderName); 
+
         this.server.emit('ocultarLoader');
       } catch (error) {
         this.server.emit('descargaNoCompletada', 'La descarga no se ha podido completar');

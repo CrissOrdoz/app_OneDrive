@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const foldersList = document.getElementById('foldersList');
     const filesList = document.getElementById('filesList');
+    var checkbox = document.getElementById('check');
 
     function limpiarTabla(tabla) {
         while (tabla.firstChild) {
@@ -46,9 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = this.dataset.name;
         const fold= this.dataset.fold;
         const driveId = this.dataset.driveid;
+        const check = checkbox.checked; 
         const type = this.parentElement.parentElement.children[0].textContent;
         const eventName = (type === 'Carpeta') ? 'descargarFolderC' : 'descargarFileC';
-        socket.emit(eventName, { id, driveId, name, fold});
+        socket.emit(eventName, { id, driveId, name, fold, check});
     }
     
 

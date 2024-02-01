@@ -161,9 +161,9 @@ export async function getFolderContent_c(accessToken: string, folderId: string, 
 
   let existe2;
 
-export async function downloadFolder_c(folderId: string, driveId:string, nameFolder: string, rutaDescarga: string, accessToken: string, existe: boolean) {
+export async function downloadFolder_c(folderId: string, driveId:string, nameFolder: string, rutaDescarga: string, accessToken: string) {
   try {
-    existe2 = existe;
+    
     const constResponse = await axios.get(
       `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children`,
       {
@@ -183,17 +183,13 @@ export async function downloadFolder_c(folderId: string, driveId:string, nameFol
 
     const promises = items.map(async (item: any) => {
       if (item.folder) {
-        await downloadFolder_c(item.id, item.parentReference.driveId, item.name, folderPath, accessToken, existe);
+        await downloadFolder_c(item.id, item.parentReference.driveId, item.name, folderPath, accessToken);
       } else if (item.file) {
-        existe = await downloadFile_c(accessToken, item.id, item.parentReference.driveId, folderPath);
+        await downloadFile_c(accessToken, item.id, item.parentReference.driveId, folderPath);
       }
     });
 
     await Promise.all(promises);
-    if (existe) {
-      existe2 = true;
-    }
-  return existe2
   } catch (error) {
     console.error('Error al descargar la carpeta', error.message);
     throw new Error('Error al descargar la carpeta');

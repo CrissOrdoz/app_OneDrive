@@ -157,12 +157,9 @@ export async function getFolderContent(accessToken: string, folderId: string): P
   }
 
 
-  let existe2;
-
-export async function downloadFolder(folderId: string, nameFolder: string, rutaDescarga: string, accessToken: string, existe: boolean) {
+export async function downloadFolder(folderId: string, nameFolder: string, rutaDescarga: string, accessToken: string) {
 
   try {
-    existe2 = existe;
     const constResponse = await axios.get(
       `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}/children`,
       {
@@ -181,26 +178,52 @@ export async function downloadFolder(folderId: string, nameFolder: string, rutaD
     
     const promises = items.map(async (item: any) => {
       if (item.folder) {
-        await downloadFolder(item.id, item.name, folderPath, accessToken, existe2);
+        await downloadFolder(item.id, item.name, folderPath, accessToken);
       } else if (item.file) {
-        existe = await downloadFile(accessToken, item.id, folderPath);
+        await downloadFile(accessToken, item.id, folderPath);
       }
     });
     
 
     await Promise.all(promises);
-
-
-    if (existe) {
-      existe2 = true;
-    }
-  return existe2
     
     
   } catch (error) {
     console.error('Error al descargar la carpeta', error.message);
     throw new Error('Error al descargar la carpeta');
   }
+}
+
+export async function verifyContent(contenido:object, ruta: string) { // verifica si el contenido que hay dentro de una carpeta exite 
+  const folders1 = contenido["folders"];
+  const files1 = contenido["files"];
+
+  const folders: { name: string; id: string }[] = [];
+  const files: { name: string; id: string }[] = [];
+
+  try {
+    folders1.forEach(fold => {
+      const folderPath = `${ruta}\\${fold.name}`;
+      if (!fs.existsSync(folderPath)) {
+        folders.push({name: fold.name, id: fold.id});
+      }
+    });
+
+    files1.forEach(fil => {
+      const filePath = `${ruta}\\${fil.name}`;
+      if (!fs.existsSync(filePath)) {
+        files.push({name: fil.name, id: fil.id});
+      }
+    });
+
+  } catch (error) {
+    console.error("Error al verificar contenido:", error);
+  }
+
+  return { 
+    folders,
+    files,
+  };
 }
 
 
